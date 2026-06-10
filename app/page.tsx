@@ -7,6 +7,11 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import { FiMail, FiLock, FiTerminal, FiArrowRight, FiSun, FiMoon } from 'react-icons/fi';
 import { useTheme } from '@/components/providers/ThemeProvider';
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+);
+
 export default function AuthenticativeGateway() {
   const { isLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -76,12 +81,12 @@ export default function AuthenticativeGateway() {
             <FiTerminal className="w-5 h-5 text-indigo-400" />
           </div>
           <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-            {isLogin ? 'Welcome back, student!' : 'Create your student account'}
+            {isLogin ? 'Welcome back, User' : 'Create your focus flow account'}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             {isLogin 
-              ? 'Sign in to continue tracking your assignments and study sessions.' 
-              : 'Join to organize your homework, deadlines, and study goals.'}
+              ? 'Sign in to continue tracking your activities' 
+              : 'Join to organize your goals and boost productivity.'}
           </p>
         </div>
 
@@ -137,7 +142,7 @@ export default function AuthenticativeGateway() {
             onClick={() => { setIsLogin(!isLogin); setErrorMsg(''); }}
             className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 transition"
           >
-            {isLogin ? "New student? Create an account" : 'Already registered? Sign in instead'}
+            {isLogin ? "New User? Create an account" : 'Already registered? Sign in instead'}
           </button>
         </div>
       </div>
