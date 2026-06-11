@@ -65,15 +65,17 @@ export default function AnalyticsWorkspace() {
   const compileTimelineChartData = () => {
     if (tasks.length === 0) {
       return [
-        { name: 'Phase 01', tasks: 0 },
-        { name: 'Phase 02', tasks: 0 },
-        { name: 'Phase 03', tasks: 0 },
+        { name: 'No Tasks', tasks: 0 },
+        { name: 'Today', tasks: 0 },
+        { name: 'Completed', tasks: 0 },
       ];
     }
     
+    const timeLabels = ['Today', 'Yesterday', '2 Days Ago', '3 Days Ago', '4 Days Ago', '5 Days Ago', '6 Days Ago'];
+    
     // Sort and map elements backwards into chronological intervals
     return tasks.slice(0, 7).reverse().map((t, idx) => ({
-      name: `T-${6 - idx}`,
+      name: timeLabels[idx] || `Day ${idx + 1}`,
       tasks: t.status === 'completed' ? 100 : 40,
       amt: idx
     }));
@@ -150,8 +152,8 @@ export default function AnalyticsWorkspace() {
           {/* VISUAL RECHARTS DATA PLOTS */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* FOCUS VELOCITY TIMELINE */}
-            <div className="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm space-y-4">
-              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-mono flex items-center space-x-2">
+            <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200/60 dark:border-slate-700/60 shadow-sm space-y-4 transition-colors duration-300">
+              <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider font-mono flex items-center space-x-2">
                 <FiActivity className="text-indigo-500" />
                 <span>Task Execution Timeline</span>
               </h4>
@@ -175,8 +177,8 @@ export default function AnalyticsWorkspace() {
             </div>
 
             {/* EMOTIONAL VECTOR FREQUENCY */}
-            <div className="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm space-y-4">
-              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-mono flex items-center space-x-2">
+            <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200/60 dark:border-slate-700/60 shadow-sm space-y-4 transition-colors duration-300">
+              <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider font-mono flex items-center space-x-2">
                 <FiActivity className="text-emerald-500" />
                 <span>Emotion Analytics Distribution</span>
               </h4>

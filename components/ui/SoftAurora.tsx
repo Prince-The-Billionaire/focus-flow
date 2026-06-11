@@ -20,6 +20,7 @@ interface SoftAuroraProps {
   colorSpeed?: number;
   enableMouseInteraction?: boolean;
   mouseInfluence?: number;
+  observeContainer?: boolean;
 }
 
 function hexToVec3(hex: string): [number, number, number] {
@@ -123,21 +124,21 @@ float perlin3D(float amplitude, float frequency, float px, float py, float pz) {
 }
 
 float auroraGlow(float t, vec2 shift) {
-  vec2 uv = gl_FragCoord.xy / uResolution.y;
-  uv += shift;
-  float noiseVal = 0.0;
-  float freq = uNoiseFreq;
-  float amp = uNoiseAmp;
-  vec2 samplePos = uv * uScale;
+   vec2 uv = gl_FragCoord.xy / uResolution.xy;
+   uv += shift;
+   float noiseVal = 0.0;
+   float freq = uNoiseFreq;
+   float amp = uNoiseAmp;
+   vec2 samplePos = uv * uScale;
 
-  for (float i = 0.0; i < 3.0; i += 1.0) {
-    noiseVal += perlin3D(amp, freq, samplePos.x, samplePos.y, t);
-    amp *= uOctaveDecay;
-    freq *= 2.0;
-  }
-  float yBand = uv.y * 10.0 - uBandHeight * 10.0;
-  return 0.3 * max(exp(uBandSpread * (1.0 - 1.1 * abs(noiseVal + yBand))), 0.0);
-}
+   for (float i = 0.0; i < 3.0; i += 1.0) {
+     noiseVal += perlin3D(amp, freq, samplePos.x, samplePos.y, t);
+     amp *= uOctaveDecay;
+     freq *= 2.0;
+   }
+   float yBand = uv.y * 10.0 - uBandHeight * 10.0;
+   return 0.3 * max(exp(uBandSpread * (1.0 - 1.1 * abs(noiseVal + yBand))), 0.0);
+ }
 
 void main() {
   vec2 uv = gl_FragCoord.xy / uResolution.xy;
@@ -159,8 +160,8 @@ export default function SoftAurora({
   speed = 0.4,
   scale = 1.2,
   brightness = 0.8,
-  color1 = '#3b82f6', // Premium blue strand
-  color2 = '#a855f7', // Velvet purple strand
+  color1 = '#3b82f6',
+  color2 = '#a855f7',
   noiseFrequency = 2.0,
   noiseAmplitude = 0.8,
   bandHeight = 0.4,
@@ -169,9 +170,11 @@ export default function SoftAurora({
   layerOffset = 0.2,
   colorSpeed = 0.5,
   enableMouseInteraction = true,
-  mouseInfluence = 0.15
+  mouseInfluence = 0.15,
+  observeContainer = true
 }: SoftAuroraProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -198,13 +201,19 @@ export default function SoftAurora({
 
     function resize() {
       if (!container) return;
-      renderer.setSize(container.offsetWidth, container.offsetHeight);
+      const rect = container.getBoundingClientRect();
+      renderer.setSize(rect.width, rect.height);
       if (program) {
         program.uniforms.uResolution.value = [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height];
       }
     }
     window.addEventListener('resize', resize);
     resize();
+
+    if (observeContainer && container) {
+      resizeObserverRef.current = new ResizeObserver(resize);
+      resizeObserverRef.current.observe(container);
+    }
 
     const geometry = new Triangle(gl);
     program = new Program(gl, {
@@ -258,6 +267,9 @@ export default function SoftAurora({
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resize);
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+      }
       if (enableMouseInteraction) {
         gl.canvas.removeEventListener('mousemove', handleMouseMove);
         gl.canvas.removeEventListener('mouseleave', handleMouseLeave);
@@ -267,7 +279,7 @@ export default function SoftAurora({
       }
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-  }, [speed, scale, brightness, color1, color2, noiseFrequency, noiseAmplitude, bandHeight, bandSpread, octaveDecay, layerOffset, colorSpeed, enableMouseInteraction, mouseInfluence]);
+  }, [speed, scale, brightness, color1, color2, noiseFrequency, noiseAmplitude, bandHeight, bandSpread, octaveDecay, layerOffset, colorSpeed, enableMouseInteraction, mouseInfluence, observeContainer]);
 
   return <div ref={containerRef} className="soft-aurora-container" />;
 }
