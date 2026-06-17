@@ -7,7 +7,7 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import SoftAurora from '@/components/ui/SoftAurora';
 import { FiMessageSquare, FiActivity, FiLogOut, FiClock, 
-  FiCheckSquare, FiAlertCircle, FiPlusCircle, FiGrid, FiCompass, FiBellOff, FiVolume2, FiRadio, FiSun, FiMoon, FiX, FiMove 
+  FiCheckSquare, FiAlertCircle, FiPlusCircle, FiGrid, FiCompass, FiBellOff, FiVolume2, FiRadio, FiSun, FiMoon, FiX, FiMove, FiMenu 
 } from 'react-icons/fi';
 import { SiGooglecalendar, SiGmail, SiGithub, SiNotion } from 'react-icons/si';
 
@@ -392,9 +392,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push(`/dashboard/${freshSessionUUID}`);
   };
 
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
+
   const radarWrapperClasses = isRadarCentered
     ? 'fixed left-1/2 top-1/2 z-[50] w-[320px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2'
     : 'absolute top-4 right-4 z-[50] flex flex-col space-y-2 max-w-[280px] w-full';
+
+  const mobileDrawerClass = (isOpen: boolean) =>
+    `fixed inset-y-0 right-0 z-40 w-3/4 max-w-sm bg-white dark:bg-slate-900 shadow-2xl transform transition-transform duration-300 ease-in-out ${
+      isOpen ? 'translate-x-0' : 'translate-x-full'
+    }`;
 
   const executeSessionDrop = async () => {
     try {
@@ -427,33 +434,113 @@ if (isLoading || !userId) {
 
   return (
     <div className="flex h-screen w-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased overflow-hidden font-sans select-none flex-col md:flex-row relative transition-colors duration-300">
+      
+      {/* MOBILE TOP BAR — only visible below md */}
+      <header className="md:hidden flex items-center justify-between px-4 h-14 bg-white dark:bg-slate-900 border-b border-slate-200/60 dark:border-slate-700/60 shadow-sm z-30 shrink-0">
+        <button
+          onClick={() => setIsMobileNavOpen(true)}
+          className="p-2 -ml-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 rounded-xl transition"
+          title="Open Menu"
+        >
+          <FiMenu className="w-5 h-5" />
+        </button>
+        <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 truncate px-2">
+          FocusFlow
+        </span>
+        <button
+          onClick={executeSessionDrop}
+          className="p-2 -mr-2 text-slate-600 dark:text-slate-400 hover:text-rose-600 rounded-xl transition"
+          title="Sign Out"
+        >
+          <FiLogOut className="w-5 h-5" />
+        </button>
+      </header>
+
+      {/* MOBILE NAVIGATION OVERLAY */}
+      {isMobileNavOpen && (
+        <div className="md:hidden fixed inset-0 z-[60] flex">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsMobileNavOpen(false)} />
+          <nav className="relative w-3/4 max-w-xs bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col p-4 space-y-2 overflow-y-auto">
+            <button
+              onClick={() => { createFreshSessionPipeline(); setIsMobileNavOpen(false); }}
+              className="h-11 w-full bg-slate-950 dark:bg-slate-100 rounded-2xl flex items-center justify-center text-white dark:text-slate-900 shadow-md hover:scale-[1.02] transition cursor-pointer gap-2"
+            >
+              <FiPlusCircle className="w-5 h-5 text-indigo-400" />
+              <span className="text-xs font-bold uppercase tracking-wider">New Chat</span>
+            </button>
+
+            <button
+              onClick={() => { router.push('/dashboard/analytics'); setIsMobileNavOpen(false); }}
+              className={`p-3 rounded-xl transition flex items-center gap-3 ${pathname.includes('analytics') ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+            >
+              <FiActivity className="w-5 h-5" />
+              <span className="text-xs font-medium">Analytics</span>
+            </button>
+
+            <button
+              onClick={() => { setIsChatsOpen(true); setIsMobileNavOpen(false); }}
+              className="p-3 rounded-xl transition flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              <FiMessageSquare className="w-5 h-5" />
+              <span className="text-xs font-medium">Recent Chats</span>
+            </button>
+
+            <button
+              onClick={() => { setIsTasksOpen(true); setIsMobileNavOpen(false); }}
+              className="p-3 rounded-xl transition flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              <FiCheckSquare className="w-5 h-5" />
+              <span className="text-xs font-medium">Tasks</span>
+            </button>
+
+            <button
+              onClick={() => { router.push('/dashboard/apps'); setIsMobileNavOpen(false); }}
+              className={`p-3 rounded-xl transition flex items-center gap-3 ${pathname.includes('apps') ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+            >
+              <FiGrid className="w-5 h-5" />
+              <span className="text-xs font-medium">Apps</span>
+            </button>
+
+            <div className="border-t border-slate-200/60 dark:border-slate-700/60 pt-2 mt-2 space-y-1">
+              <button
+                onClick={() => { toggleTheme(); setIsMobileNavOpen(false); }}
+                className="p-3 rounded-xl transition flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 w-full"
+              >
+                {theme === 'light' ? <FiMoon className="w-5 h-5" /> : <FiSun className="w-5 h-5 text-amber-400" />}
+                <span className="text-xs font-medium">Toggle Theme</span>
+              </button>
+              <button
+                onClick={() => { setIsRadarVisible(!isRadarVisible); setIsMobileNavOpen(false); }}
+                className="p-3 rounded-xl transition flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 w-full"
+              >
+                {isRadarVisible ? <FiX className="w-5 h-5" /> : <FiRadio className="w-5 h-5" />}
+                <span className="text-xs font-medium">{isRadarVisible ? 'Hide Radar' : 'Show Radar'}</span>
+              </button>
+            </div>
+
+            <div className="mt-auto pt-4">
+              <button
+                onClick={() => { executeSessionDrop(); setIsMobileNavOpen(false); }}
+                className="p-3 rounded-xl transition flex items-center gap-3 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 w-full"
+              >
+                <FiLogOut className="w-5 h-5" />
+                <span className="text-xs font-medium">Sign Out</span>
+              </button>
+            </div>
+          </nav>
+        </div>
+      )}
        
       {/* HIGH-VISIBILITY TOP-RIGHT SYSTEM RADAR COUNTDOWN LAYER */}
       {isRadarVisible && liveCountdowns.length > 0 && (
         <div className={radarWrapperClasses}>
           <div className="bg-slate-950/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-800 dark:border-slate-700 rounded-xl p-3 shadow-2xl flex flex-col space-y-2">
-            <div className="flex items-center justify-between gap-2 border-b border-slate-800 dark:border-slate-700 pb-1.5">
+            <div className="flex items-center border-b border-slate-800 dark:border-slate-700 pb-1.5">
               <div className="flex items-center space-x-1.5">
                 <FiRadio className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
                 <span className="text-[10px] font-mono tracking-wider font-bold text-slate-400 uppercase">
                   Alarm Radar Monitor
                 </span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <button
-                  onClick={() => setIsRadarCentered(!isRadarCentered)}
-                  className="rounded-xl p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 transition"
-                  title={isRadarCentered ? 'Move radar back to corner' : 'Center radar on screen'}
-                >
-                  <FiMove className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => setIsRadarVisible(false)}
-                  className="rounded-xl p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 transition"
-                  title="Hide radar monitor"
-                >
-                  <FiX className="w-3.5 h-3.5" />
-                </button>
               </div>
             </div>
             <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
@@ -535,9 +622,9 @@ if (isLoading || !userId) {
         </div>
       )}
 
-      {/* SIDEBAR CENTRAL UTILITY NAVIGATION ICON BAR */}
-      <aside className="w-full md:w-20 h-16 md:h-full bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-r border-slate-200/60 dark:border-slate-700/60 flex flex-row md:flex-col items-center justify-between px-4 md:py-8 z-30 shadow-sm shrink-0 transition-colors duration-300">
-        <div className="flex flex-row md:flex-col items-center space-x-4 md:space-x-0 md:space-y-10">
+      {/* SIDEBAR CENTRAL UTILITY NAVIGATION ICON BAR — hidden on mobile */}
+      <aside className="hidden md:flex md:w-20 h-full bg-white dark:bg-slate-900 border-r border-slate-200/60 dark:border-slate-700/60 flex-col items-center justify-between py-8 z-30 shadow-sm shrink-0 transition-colors duration-300">
+        <div className="flex flex-col items-center space-y-10">
           <button 
             onClick={createFreshSessionPipeline}
             className="h-10 w-10 bg-slate-950 dark:bg-slate-100 rounded-2xl flex items-center justify-center text-white dark:text-slate-900 shadow-md hover:scale-105 transition cursor-pointer" 
@@ -546,23 +633,23 @@ if (isLoading || !userId) {
             <FiPlusCircle className="w-5 h-5 text-indigo-400" />
           </button>
           
-          <nav className="flex flex-row md:flex-col space-x-2 md:space-x-0 md:space-y-5">
+          <nav className="flex flex-col items-center space-y-5">
             <button 
               onClick={() => setIsChatsOpen(!isChatsOpen)}
               className={`p-3 rounded-xl transition flex flex-col items-center ${isChatsOpen ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
               title="Toggle Recent Conversations Drawer"
             >
               <FiMessageSquare className="w-5 h-5" />
-              <span className="hidden lg:block text-[8px] font-mono uppercase tracking-wider mt-1">Messages</span>
+              <span className="text-[8px] font-mono uppercase tracking-wider mt-1">Messages</span>
             </button>
 
             <button
               onClick={() => setIsTasksOpen(!isTasksOpen)}
-              className={`p-3 rounded-xl transition hidden lg:flex lg:flex-col lg:items-center ${isTasksOpen ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/30' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+              className={`p-3 rounded-xl transition flex flex-col items-center ${isTasksOpen ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/30' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
               title="Toggle Task Board Streams"
             >
               <FiCheckSquare className="w-5 h-5" />
-              <span className="hidden lg:block text-[8px] font-mono uppercase tracking-wider mt-1">Tasks</span>
+              <span className="text-[8px] font-mono uppercase tracking-wider mt-1">Tasks</span>
             </button>
             
             <button
@@ -571,7 +658,7 @@ if (isLoading || !userId) {
               title="System Analytics Metrics"
             >
               <FiActivity className="w-5 h-5" />
-              <span className="hidden lg:block text-[8px] font-mono uppercase tracking-wider mt-1">Analytics</span>
+              <span className="text-[8px] font-mono uppercase tracking-wider mt-1">Analytics</span>
             </button>
 
             <button
@@ -580,7 +667,7 @@ if (isLoading || !userId) {
               title="Connected Pipelines Ecosystem"
             >
               <FiGrid className="w-5 h-5" />
-              <span className="hidden lg:block text-[8px] font-mono uppercase tracking-wider mt-1">Apps</span>
+              <span className="text-[8px] font-mono uppercase tracking-wider mt-1">Apps</span>
             </button>
 
             <button
@@ -593,7 +680,7 @@ if (isLoading || !userId) {
               ) : (
                 <FiSun className="w-5 h-5 text-amber-400" />
               )}
-              <span className="hidden lg:block text-[8px] font-mono uppercase tracking-wider mt-1">Theme</span>
+              <span className="text-[8px] font-mono uppercase tracking-wider mt-1">Theme</span>
             </button>
             <button
               onClick={() => setIsRadarVisible(!isRadarVisible)}
@@ -601,7 +688,7 @@ if (isLoading || !userId) {
               title={isRadarVisible ? 'Hide Radar Monitor' : 'Show Radar Monitor'}
             >
               <FiX className="w-5 h-5" />
-              <span className="hidden lg:block text-[8px] font-mono uppercase tracking-wider mt-1">Radar</span>
+              <span className="text-[8px] font-mono uppercase tracking-wider mt-1">Radar</span>
             </button>
             <button
               onClick={() => setIsRadarCentered(!isRadarCentered)}
@@ -609,7 +696,7 @@ if (isLoading || !userId) {
               title={isRadarCentered ? 'Move Radar to corner' : 'Center Radar Monitor'}
             >
               <FiMove className="w-5 h-5" />
-              <span className="hidden lg:block text-[8px] font-mono uppercase tracking-wider mt-1">Center</span>
+              <span className="text-[8px] font-mono uppercase tracking-wider mt-1">Center</span>
             </button>
           </nav>
         </div>
@@ -625,15 +712,19 @@ if (isLoading || !userId) {
 
       {/* RECENT CHATS LOG DOCK PANEL */}
       <section 
-        className={`hidden lg:flex h-full bg-slate-50/30 dark:bg-slate-900/30 border-r border-slate-200/50 dark:border-slate-700/50 flex-col shrink-0 overflow-hidden select-none transition-all duration-300 ease-in-out ${
-          isChatsOpen ? 'w-64 opacity-100 visibility-visible' : 'w-0 opacity-0 pointer-events-none border-r-0'
-        }`}
+        className={`${isChatsOpen ? 'flex' : 'hidden'} h-full bg-slate-50/30 dark:bg-slate-900/30 border-r border-slate-200/50 dark:border-slate-700/50 flex-col shrink-0 overflow-hidden select-none transition-all duration-300 ease-in-out w-64 opacity-100 lg:static lg:z-auto fixed inset-0 z-50 lg:z-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md lg:backdrop-blur-none`}
       >
-        <header className="p-5 border-b border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between bg-white/40 dark:bg-slate-800/40">
+        <header className="p-5 border-b border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between bg-white/40 dark:bg-slate-800/40 shrink-0">
           <div className="flex items-center space-x-2">
             <FiCompass className="w-4 h-4 text-slate-600 dark:text-slate-400" />
             <h4 className="text-xs font-bold tracking-wider text-slate-700 dark:text-slate-300 uppercase font-mono">Conversations</h4>
           </div>
+          <button
+            onClick={() => setIsChatsOpen(false)}
+            className="lg:hidden p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl transition"
+          >
+            <FiX className="w-4 h-4" />
+          </button>
         </header>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
@@ -678,15 +769,19 @@ if (isLoading || !userId) {
 
       {/* ACTIVE TASKS TRACK PANEL */}
       <section 
-        className={`hidden lg:flex h-full bg-slate-50/50 dark:bg-slate-900/50 border-r border-slate-200/50 dark:border-slate-700/50 flex-col shrink-0 overflow-hidden select-none transition-all duration-300 ease-in-out ${
-          isTasksOpen ? 'w-64 opacity-100 visibility-visible' : 'w-0 opacity-0 pointer-events-none border-r-0'
-        }`}
+        className={`${isTasksOpen ? 'flex' : 'hidden'} h-full bg-slate-50/50 dark:bg-slate-900/50 border-r border-slate-200/50 dark:border-slate-700/50 flex-col shrink-0 overflow-hidden select-none transition-all duration-300 ease-in-out w-64 opacity-100 lg:static lg:z-auto fixed inset-0 z-50 lg:z-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md lg:backdrop-blur-none`}
       >
-        <header className="p-5 border-b border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between bg-white/40 dark:bg-slate-800/40">
+        <header className="p-5 border-b border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between bg-white/40 dark:bg-slate-800/40 shrink-0">
           <div className="flex items-center space-x-2">
             <FiCheckSquare className="w-4 h-4 text-indigo-600" />
             <h4 className="text-xs font-bold tracking-wider text-slate-700 dark:text-slate-300 uppercase font-mono">Active Tasks</h4>
           </div>
+          <button
+            onClick={() => setIsTasksOpen(false)}
+            className="lg:hidden p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl transition"
+          >
+            <FiX className="w-4 h-4" />
+          </button>
         </header>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2.5">

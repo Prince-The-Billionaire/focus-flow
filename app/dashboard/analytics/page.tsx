@@ -121,12 +121,12 @@ export default function AnalyticsWorkspace() {
   }
 
   return (
-    <div className="h-full w-full p-6 overflow-y-auto relative space-y-6 dark:bg-slate-950">
+    <div className="h-full w-full p-4 md:p-6 overflow-y-auto relative space-y-4 md:space-y-6 dark:bg-slate-950">
       <SoftAurora speed={0.1} scale={1.2} brightness={0.95} color1="#f1f5f9" color2="#e2e8f0" />
       
       <div className="relative z-10 space-y-1">
-        <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Your Progress Overview</h2>
-        <p className="text-xs text-slate-400 dark:text-slate-500">Track your completed assignments and focus trends</p>
+        <h2 className="text-lg md:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Your Progress Overview</h2>
+        <p className="text-[11px] md:text-xs text-slate-400 dark:text-slate-500">Track your completed assignments and focus trends</p>
       </div>
 
       {isLoading ? (
@@ -157,23 +157,23 @@ export default function AnalyticsWorkspace() {
                 <FiActivity className="text-indigo-500" />
                 <span>Task Execution Timeline</span>
               </h4>
-<div className="w-full h-48 text-[10px] font-mono">
-                 <ResponsiveContainer width="100%" height="100%">
-                   <AreaChart data={compileTimelineChartData()} margin={{ top: 10, right: 10, left: -25, bottom: 20 }}>
-                     <defs>
-                       <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
-                         <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
-                         <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                       </linearGradient>
-                     </defs>
-                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                     <XAxis dataKey="name" stroke="#94a3b8" label={{ value: 'Recent Tasks', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fontSize: 10, fill: '#64748b' } }} />
-                     <YAxis stroke="#94a3b8" />
-                     <Tooltip />
-                     <Area type="monotone" dataKey="tasks" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorTasks)" />
-                   </AreaChart>
-                 </ResponsiveContainer>
-               </div>
+  <div className="w-full h-40 sm:h-48 text-[10px] font-mono">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={compileTimelineChartData()} margin={{ top: 10, right: 5, left: -15, bottom: 15 }}>
+                        <defs>
+                          <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 9 }} label={{ value: 'Recent Tasks', position: 'insideBottom', offset: -8, style: { textAnchor: 'middle', fontSize: 9, fill: '#64748b' } }} />
+                        <YAxis stroke="#94a3b8" tick={{ fontSize: 9 }} />
+                        <Tooltip />
+                        <Area type="monotone" dataKey="tasks" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorTasks)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
             </div>
 
             {/* EMOTIONAL VECTOR FREQUENCY */}
@@ -182,21 +182,21 @@ export default function AnalyticsWorkspace() {
                 <FiActivity className="text-emerald-500" />
                 <span>Emotion Analytics Distribution</span>
               </h4>
-<div className="w-full h-48 text-[10px] font-mono">
-                 <ResponsiveContainer width="100%" height="100%">
-                   <BarChart data={compileEmotionChartData()} margin={{ top: 10, right: 10, left: -25, bottom: 20 }}>
-                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                     <XAxis dataKey="name" stroke="#94a3b8" label={{ value: 'Detected Emotions', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fontSize: 10, fill: '#64748b' } }} />
-                     <YAxis stroke="#94a3b8" tickFormatter={(value) => Number(value).toFixed(0)} />
-                     <Tooltip />
-                     <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={40}>
-                       {compileEmotionChartData().map((entry, index) => (
-                         <Cell key={`cell-${index}`} fill={entry.color} />
-                       ))}
-                     </Bar>
-                   </BarChart>
-                 </ResponsiveContainer>
-               </div>
+  <div className="w-full h-40 sm:h-48 text-[10px] font-mono">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={compileEmotionChartData()} margin={{ top: 10, right: 5, left: -15, bottom: 15 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 9 }} label={{ value: 'Detected Emotions', position: 'insideBottom', offset: -8, style: { textAnchor: 'middle', fontSize: 9, fill: '#64748b' } }} />
+                        <YAxis stroke="#94a3b8" tick={{ fontSize: 9 }} tickFormatter={(value) => Number(value).toFixed(0)} />
+                        <Tooltip />
+                        <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={35}>
+                          {compileEmotionChartData().map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
             </div>
           </div>
 
@@ -213,17 +213,17 @@ export default function AnalyticsWorkspace() {
                   </div>
                 ) : (
                   tasks.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-slate-700/40 rounded-xl text-xs transition-colors duration-300">
-                      <div className="flex items-center space-x-3 truncate max-w-[75%]">
-                        {item.status === 'completed' ? (
-                          <FiCheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                        ) : (
-                          <FiClock className="w-4 h-4 text-amber-500 shrink-0" />
-                        )}
-                        <span className={`truncate font-semibold ${item.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-700 dark:text-slate-300'}`}>
-                          {item.task}
-                        </span>
-                      </div>
+                     <div key={item.id} className="flex flex-col md:flex-row md:items-center justify-between p-2.5 md:p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-slate-700/40 rounded-xl text-xs transition-colors duration-300 space-y-1.5 md:space-y-0">
+                       <div className="flex items-center space-x-3 truncate w-full md:w-auto">
+                         {item.status === 'completed' ? (
+                           <FiCheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                         ) : (
+                           <FiClock className="w-4 h-4 text-amber-500 shrink-0" />
+                         )}
+                         <span className={`truncate font-semibold text-start md:text-center ${item.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                           {item.task}
+                         </span>
+                       </div>
                       <span className="text-[9px] font-mono font-bold bg-white dark:bg-slate-800 px-2 py-0.5 rounded border text-slate-500 dark:text-slate-400 uppercase tracking-tight">
                         {item.app}
                       </span>

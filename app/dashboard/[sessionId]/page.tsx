@@ -85,14 +85,15 @@ export default function SmoothWorkspace() {
 
   useEffect(() => {
     if (layoutMode === 'side') {
+      const isMobile = window.matchMedia('(max-width: 767px)').matches;
       const tl = gsap.timeline({ defaults: { ease: 'power3.inOut', duration: 0.85 } });
       if (centerHeaderRef.current) {
         tl.to(centerHeaderRef.current, { opacity: 0, y: -20, duration: 0.3 }, 0);
       }
-      tl.to(avatarWrapperRef.current, { width: '45%' }, 0);
+      tl.to(avatarWrapperRef.current, { width: isMobile ? '18vh' : '45%' }, 0);
       tl.fromTo(chatPanelRef.current, 
         { opacity: 0, x: 40, display: 'none' },
-        { opacity: 1, x: 0, display: 'flex', width: '55%' },
+        { opacity: 1, x: 0, display: 'flex', width: isMobile ? '100%' : '55%' },
         0
       );
     } else {
@@ -272,15 +273,16 @@ export default function SmoothWorkspace() {
     <div className="flex h-full w-full relative flex-col md:flex-row overflow-hidden dark:bg-slate-950 transition-colors duration-300">
       <SoftAurora speed={0.3} scale={1.1} brightness={0.92} color1="#cbd5e1" color2="#e2e8f0" />
 
-      <div ref={avatarWrapperRef} className="h-2/5 md:h-full flex flex-col items-center justify-center relative z-20 mx-auto px-4 transition-all duration-300 w-full">
+      {/* AVATAR / HERO SECTION */}
+      <div ref={avatarWrapperRef} className={`${layoutMode === 'side' ? 'absolute top-2 right-2 z-30 h-[18vh] w-[18vh] md:relative md:top-auto md:right-auto md:z-20 md:h-full md:w-auto' : 'relative z-20 h-[45vh] md:h-full w-full md:w-auto'} flex flex-col items-center justify-center px-4 transition-all duration-300 shrink-0`}>
         {layoutMode === 'center' && (
-          <div ref={centerHeaderRef} className="text-center mb-4 space-y-1 pointer-events-none absolute top-6 md:top-24 transition-all hidden sm:block">
-            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Your Focus Space</h2>
-            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto font-medium">Chat to organize your assignments, set reminders, and track deadlines.</p>
+          <div ref={centerHeaderRef} className="text-center mb-4 space-y-1 pointer-events-none absolute top-4 md:top-24 transition-all w-full px-4">
+            <h2 className="text-xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Your Focus Space</h2>
+            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto font-medium px-4">Chat to organize your assignments, set reminders, and track deadlines.</p>
           </div>
         )}
 
-        <div className="w-[320px] h-[320px] md:w-[460px] md:h-[460px] flex items-center justify-center relative shrink-0">
+        <div className="w-[240px] h-[240px] sm:w-[320px] sm:h-[320px] md:w-[400px] md:h-[400px] flex items-center justify-center relative shrink-0">
           <ThreeAvatar isAnalyzing={isComputing} layoutMode={layoutMode} />
         </div>
 
@@ -291,7 +293,7 @@ export default function SmoothWorkspace() {
                 type="text"
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
-                placeholder="What's your next assignment? I can help you track it."
+                placeholder="What's your next assignment?"
                 className="flex-1 bg-transparent border-0 py-2.5 pl-3 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none"
               />
               <button type="submit" className="bg-slate-950 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 p-3 rounded-xl shadow transition">
@@ -302,7 +304,8 @@ export default function SmoothWorkspace() {
         )}
       </div>
 
-      <div ref={chatPanelRef} className={`h-3/5 md:h-full flex flex-col justify-between border-t md:border-t-0 md:border-l border-slate-200/40 dark:border-slate-700/40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl z-10 overflow-hidden shadow-2xl transition-all duration-300 w-full ${layoutMode === 'center' ? 'hidden' : 'flex'}`}>
+      {/* CHAT PANEL */}
+      <div ref={chatPanelRef} className={`flex flex-col justify-between border-t md:border-t-0 md:border-l border-slate-200/40 dark:border-slate-700/40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl z-10 overflow-hidden shadow-2xl transition-all duration-300 w-full md:w-auto ${layoutMode === 'center' ? 'hidden md:flex' : 'flex h-[calc(100dvh-1rem)] md:h-full'}`}>
         <header className="px-6 py-4 border-b border-slate-200/40 dark:border-slate-700/40 flex items-center justify-between bg-white/40 dark:bg-slate-800/40 shrink-0">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 font-mono">Study Chat</span>
           <div className="flex items-center space-x-2 text-[10px] bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3 py-1.5 rounded-lg font-mono">
@@ -311,7 +314,7 @@ export default function SmoothWorkspace() {
           </div>
         </header>
 
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-4">
           {messages.map((msg) => (
             <div key={msg.id} className="w-full flex flex-col space-y-2">
               <div className={`flex w-full ${msg.role === 'USER' ? 'justify-end' : 'justify-start'}`}>

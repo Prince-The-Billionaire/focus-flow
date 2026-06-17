@@ -90,7 +90,7 @@ export default function AppsWorkspace() {
   }
 
   return (
-    <div className="h-full w-full p-6 overflow-y-auto relative space-y-6 dark:bg-slate-950 transition-colors duration-300">
+    <div className="h-full w-full p-4 md:p-6 overflow-y-auto relative space-y-6 dark:bg-slate-950 transition-colors duration-300">
       <SoftAurora speed={0.15} scale={1.1} brightness={0.96} color1="#cbd5e1" color2="#f1f5f9" />
 
       <div className="relative z-10 space-y-1">
