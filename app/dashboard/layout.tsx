@@ -7,7 +7,7 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import SoftAurora from '@/components/ui/SoftAurora';
 import { FiMessageSquare, FiActivity, FiLogOut, FiClock, 
-  FiCheckSquare, FiAlertCircle, FiPlusCircle, FiGrid, FiCompass, FiBellOff, FiVolume2, FiRadio, FiSun, FiMoon 
+  FiCheckSquare, FiAlertCircle, FiPlusCircle, FiGrid, FiCompass, FiBellOff, FiVolume2, FiRadio, FiSun, FiMoon, FiX, FiMove 
 } from 'react-icons/fi';
 import { SiGooglecalendar, SiGmail, SiGithub, SiNotion } from 'react-icons/si';
 
@@ -56,6 +56,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   
   const [isTasksOpen, setIsTasksOpen] = useState<boolean>(true);
   const [isChatsOpen, setIsChatsOpen] = useState<boolean>(true);
+  const [isRadarVisible, setIsRadarVisible] = useState<boolean>(true);
+  const [isRadarCentered, setIsRadarCentered] = useState<boolean>(false);
 
   // Browser Audio Activation Gating State
   const [needsUserInteractionUnlock, setNeedsUserInteractionUnlock] = useState<boolean>(true);
@@ -218,7 +220,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const toast = new Notification('⏰ CRITICAL TASK HORIZON BREACH', {
         body: `Action Required: "${taskTitle}". System pipeline requires prompt resolution.`,
         tag: `focus_task_${taskId}`,
-        renotify: true,
         requireInteraction: true, 
         silent: true 
       });
@@ -391,6 +392,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push(`/dashboard/${freshSessionUUID}`);
   };
 
+  const radarWrapperClasses = isRadarCentered
+    ? 'fixed left-1/2 top-1/2 z-[50] w-[320px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2'
+    : 'absolute top-4 right-4 z-[50] flex flex-col space-y-2 max-w-[280px] w-full';
+
   const executeSessionDrop = async () => {
     try {
       await supabase.auth.signOut();
@@ -424,14 +429,32 @@ if (isLoading || !userId) {
     <div className="flex h-screen w-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased overflow-hidden font-sans select-none flex-col md:flex-row relative transition-colors duration-300">
        
       {/* HIGH-VISIBILITY TOP-RIGHT SYSTEM RADAR COUNTDOWN LAYER */}
-      {liveCountdowns.length > 0 && (
-        <div className="absolute top-4 right-4 z-[50] flex flex-col space-y-2 max-w-xs w-full pointer-events-auto">
+      {isRadarVisible && liveCountdowns.length > 0 && (
+        <div className={radarWrapperClasses}>
           <div className="bg-slate-950/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-800 dark:border-slate-700 rounded-xl p-3 shadow-2xl flex flex-col space-y-2">
-            <div className="flex items-center space-x-1.5 border-b border-slate-800 dark:border-slate-700 pb-1.5">
-              <FiRadio className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
-              <span className="text-[10px] font-mono tracking-wider font-bold text-slate-400 uppercase">
-                Alarm Radar Monitor
-              </span>
+            <div className="flex items-center justify-between gap-2 border-b border-slate-800 dark:border-slate-700 pb-1.5">
+              <div className="flex items-center space-x-1.5">
+                <FiRadio className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                <span className="text-[10px] font-mono tracking-wider font-bold text-slate-400 uppercase">
+                  Alarm Radar Monitor
+                </span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={() => setIsRadarCentered(!isRadarCentered)}
+                  className="rounded-xl p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 transition"
+                  title={isRadarCentered ? 'Move radar back to corner' : 'Center radar on screen'}
+                >
+                  <FiMove className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setIsRadarVisible(false)}
+                  className="rounded-xl p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 transition"
+                  title="Hide radar monitor"
+                >
+                  <FiX className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
             <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
               {liveCountdowns.map((cd) => (
@@ -571,6 +594,22 @@ if (isLoading || !userId) {
                 <FiSun className="w-5 h-5 text-amber-400" />
               )}
               <span className="hidden lg:block text-[8px] font-mono uppercase tracking-wider mt-1">Theme</span>
+            </button>
+            <button
+              onClick={() => setIsRadarVisible(!isRadarVisible)}
+              className="p-3 rounded-xl transition flex flex-col items-center text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800"
+              title={isRadarVisible ? 'Hide Radar Monitor' : 'Show Radar Monitor'}
+            >
+              <FiX className="w-5 h-5" />
+              <span className="hidden lg:block text-[8px] font-mono uppercase tracking-wider mt-1">Radar</span>
+            </button>
+            <button
+              onClick={() => setIsRadarCentered(!isRadarCentered)}
+              className="p-3 rounded-xl transition flex flex-col items-center text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800"
+              title={isRadarCentered ? 'Move Radar to corner' : 'Center Radar Monitor'}
+            >
+              <FiMove className="w-5 h-5" />
+              <span className="hidden lg:block text-[8px] font-mono uppercase tracking-wider mt-1">Center</span>
             </button>
           </nav>
         </div>
