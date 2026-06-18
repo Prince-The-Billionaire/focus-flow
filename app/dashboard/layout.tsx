@@ -34,6 +34,7 @@ interface ManagedAlarmNode {
   taskId: string;
   taskTitle: string;
   nextTriggerTime: Date;
+  timeDue: string;
 }
 
 interface UIVisualCountdown {
@@ -113,14 +114,59 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     console.log('[AUDIO AUDIO ENGINE]: Unlocked via explicit user action engagement.');
   };
 
-  // Compute a random millisecond delay between a 15 to 45-minute horizon range
-  const calculateRandomInterval = (): Date => {
-    const target = new Date();
-    const minMinutes = 15;
-    const maxMinutes = 45;
-    const randomizedMinutes = Math.floor(Math.random() * (maxMinutes - minMinutes + 1)) + minMinutes;
-    target.setMinutes(target.getMinutes() + randomizedMinutes);
-    return target;
+  // Calculate alarm time: 1 hour before task's time_due
+  const calculateAlarmTimeFromDueTime = (timeDueString: string): Date => {
+    try {
+      // Parse the time_due string (e.g., "2:30 PM", "14:30", "12:00 PM", etc.)
+      const now = new Date();
+      let dueTime: Date;
+
+      // Try to parse various time formats
+      if (timeDueString.includes(':')) {
+        // Extract hours and minutes
+        const match = timeDueString.match(/(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)?/);
+        if (match) {
+          let hours = parseInt(match[1], 10);
+          const minutes = parseInt(match[2], 10);
+          const meridiem = match[3]?.toUpperCase();
+
+          // Handle 12-hour format
+          if (meridiem) {
+            if (meridiem === 'PM' && hours !== 12) hours += 12;
+            if (meridiem === 'AM' && hours === 12) hours = 0;
+          }
+
+          dueTime = new Date(now);
+          dueTime.setHours(hours, minutes, 0, 0);
+
+          // If the time is in the past today, assume it's for tomorrow
+          if (dueTime < now) {
+            dueTime.setDate(dueTime.getDate() + 1);
+          }
+        } else {
+          // Fallback: use current time + 1 hour
+          dueTime = new Date(now);
+          dueTime.setHours(dueTime.getHours() + 1);
+        }
+      } else {
+        // If no time format recognized, set for 1 hour from now
+        dueTime = new Date(now);
+        dueTime.setHours(dueTime.getHours() + 1);
+      }
+
+      // Set alarm for 1 hour before the due time
+      const alarmTime = new Date(dueTime);
+      alarmTime.setHours(alarmTime.getHours() - 1);
+
+      // If alarm time is in the past, trigger immediately
+      return alarmTime < now ? now : alarmTime;
+    } catch (err) {
+      console.error('[ALARM TIME PARSE ERROR]:', err);
+      // Fallback: 1 hour from now
+      const fallback = new Date();
+      fallback.setHours(fallback.getHours() + 1);
+      return fallback;
+    }
   };
 
   const rebuildAlarmScheduleMatrix = useCallback((tasks: PersistentTaskNode[]) => {
@@ -137,7 +183,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return {
         taskId: task.id,
         taskTitle: task.task,
-        nextTriggerTime: calculateRandomInterval()
+        timeDue: task.time_due,
+        nextTriggerTime: calculateAlarmTimeFromDueTime(task.time_due)
       };
     });
 
@@ -147,7 +194,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
 
     console.log('[ALARM ENGINE DATA DESYNC GUARD]: Preserved existing timers. Matrix allocation size ->', activeAlarmsRef.current.length);
-  }, []);
+  }, [calculateAlarmTimeFromDueTime]);
 
   // VClock Continuous High-Decibel Looping Audio Pipeline Engine
   const triggerLoudSirenLoop = (taskTitle: string) => {
@@ -317,8 +364,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             }, 120000);
           }
 
-          // Cycle to next window position
-          alarm.nextTriggerTime = calculateRandomInterval();
+          // Cycle to next occurrence (same time next day)
+          const nextTrigger = new Date(alarm.nextTriggerTime);
+          nextTrigger.setDate(nextTrigger.getDate() + 1);
+          alarm.nextTriggerTime = nextTrigger;
         }
       });
 
