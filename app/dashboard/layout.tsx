@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isTasksOpen, setIsTasksOpen] = useState<boolean>(true);
   const [isChatsOpen, setIsChatsOpen] = useState<boolean>(true);
   const [isRadarVisible, setIsRadarVisible] = useState<boolean>(true);
-  const [isRadarCentered, setIsRadarCentered] = useState<boolean>(false);
+  const [isRadarCentered, setIsRadarCentered] = useState<boolean>(true);
 
   // Browser Audio Activation Gating State
   const [needsUserInteractionUnlock, setNeedsUserInteractionUnlock] = useState<boolean>(true);
@@ -623,7 +623,7 @@ if (isLoading || !userId) {
       )}
 
       {/* SIDEBAR CENTRAL UTILITY NAVIGATION ICON BAR — hidden on mobile */}
-      <aside className="hidden md:flex md:w-20 h-full bg-white dark:bg-slate-900 border-r border-slate-200/60 dark:border-slate-700/60 flex-col items-center justify-between py-8 z-30 shadow-sm shrink-0 transition-colors duration-300">
+      <aside className="hidden md:flex md:w-20 h-full bg-white dark:bg-slate-900 border-r border-slate-200/60 dark:border-slate-700/60 flex-col items-center justify-between py-8 z-30  shadow-sm shrink-0 transition-colors duration-300">
         <div className="flex flex-col items-center space-y-10">
           <button 
             onClick={createFreshSessionPipeline}
@@ -690,14 +690,14 @@ if (isLoading || !userId) {
               <FiX className="w-5 h-5" />
               <span className="text-[8px] font-mono uppercase tracking-wider mt-1">Radar</span>
             </button>
-            <button
+            {/* <button
               onClick={() => setIsRadarCentered(!isRadarCentered)}
               className="p-3 rounded-xl transition flex flex-col items-center text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800"
               title={isRadarCentered ? 'Move Radar to corner' : 'Center Radar Monitor'}
             >
               <FiMove className="w-5 h-5" />
               <span className="text-[8px] font-mono uppercase tracking-wider mt-1">Center</span>
-            </button>
+            </button> */}
           </nav>
         </div>
         
