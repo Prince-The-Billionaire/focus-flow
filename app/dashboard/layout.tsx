@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     console.log('[AUDIO AUDIO ENGINE]: Unlocked via explicit user action engagement.');
   };
 
-  // Calculate alarm time: 1 hour before task's time_due
+  // Calculate alarm time: 1 hour before task's time_due, but if due is under 1 hour away use the due time directly
   const calculateAlarmTimeFromDueTime = (timeDueString: string): Date => {
     try {
       // Parse the time_due string (e.g., "2:30 PM", "14:30", "12:00 PM", etc.)
@@ -154,11 +154,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         dueTime.setHours(dueTime.getHours() + 1);
       }
 
+      const millisecondsUntilDue = dueTime.getTime() - now.getTime();
+      const oneHourMs = 60 * 60 * 1000;
+
+      // If there's less than one hour until due, use the due time directly
+      if (millisecondsUntilDue <= oneHourMs) {
+        return dueTime < now ? now : dueTime;
+      }
+
       // Set alarm for 1 hour before the due time
       const alarmTime = new Date(dueTime);
       alarmTime.setHours(alarmTime.getHours() - 1);
 
-      // If alarm time is in the past, trigger immediately
       return alarmTime < now ? now : alarmTime;
     } catch (err) {
       console.error('[ALARM TIME PARSE ERROR]:', err);
@@ -302,10 +309,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const formatTimerString = (totalSeconds: number): string => {
-    if (totalSeconds <= 0) return '00:00';
-    const mins = Math.floor(totalSeconds / 60);
+    if (totalSeconds <= 0) return '00:00:00';
+    const hours = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
     const secs = totalSeconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   // Pull active analytics alert tasks bound to the user id from the dedicated tasks pipeline
