@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     });
 
     // 3. Dispatch stateless payload token over to your Python daemon for processing
-    const pythonResponse = await fetch('http://127.0.0.1:8000/api/process-intent', {
+    const pythonResponse = await fetch('https://storm-chewer-gaining.ngrok-free.dev/api/process-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
